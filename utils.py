@@ -176,16 +176,123 @@ def train_test_split_train(X_train, Y_train, X_valid, Y_valid, params, feature_l
 
     return score
 
-def forward_elimination(df,params):
-    #add feature one by one
+def forward_elimination(df,features,test,params,min_imp):
+    feature_list = list(df[features].columns)
+    
+    df_ = df[features]
+    y = df['y']
+    
+    feature_select_count = {}
+    rand_seed_list = [42,2018]
+    
+    for rand in rand_seed_list:
+        
+        selected_list = []
+        best_score = 0
+        random.seed(rand)
+        random.shuffle(feature_list)
+        
+        for feature in feature_list :
+            
+            print("----------------------------------------------------------------------------------------------")
+            temp_list = list(selected_list)
+            temp_list.append(feature)
+            score = train_test_split_train(df_[temp_list],y,test[temp_list],test['y'],params,temp_list,50,False,0.5)
+            
+            print("currently checking....",feature)
+            if (score-best_score) > min_imp:
+                print ("current_score :",score)
+                print ("current_features :",temp_list)
+                best_score = score
+                print ("best_score :",best_score)
+                selected_list.append(feature)
+        for key in selected_list:
+            if feature_select_count.get(key) :
+                feature_select_count[key] = feature_select_count[key] + 1
+            else:
+                feature_select_count[key] = 1
+        
+        print("----------------------------------------------------------------------------------------------")
+                    
+    return selected_list,feature_improve,feature_select_count
 
 
-def backward_elimination():
-    #elimilate feature one by one
+def backward_elimination(df,features,test,params,max_cut):
+    
+    feature_list = list(df[features].columns)
+    
+    df_temp = df[features]
+    y = df['y']
+    
+    feature_select_count = {}
+    rand_seed_list = [42,2018]
+    
+    for rand in rand_seed_list:
+        
+        selected_list = list(feature_list)
+        best_score = train_test_split_train(df_temp[selected_list],y,test[selected_list],
+                                            test['y'],params,selected_list,50,False,0.5)
+        random.seed(rand)
+        random.shuffle(feature_list)
+        
+        for feature in feature_list :
+            
+            print("----------------------------------------------------------------------------------------------")
+            temp_list = list(selected_list)
+            temp_list.remove(feature)
+            score = train_test_split_train(df_temp[temp_list],y,test[temp_list],
+                                           test['y'],params,temp_list,50,False,0.5)
+            
+            print("currently checking....",feature)
+            if (best_score - score) < max_cut:
+                print ("current_score :",score)
+                best_score = score
+                print ("best_score :",best_score)
+                selected_list.remove(feature)
+                
+        for key in selected_list:
+            if feature_select_count.get(key) :
+                feature_select_count[key] = feature_select_count[key] + 1
+            else:
+                feature_select_count[key] = 1
+        
+    return selected_list,feature_improve,feature_select_count
+    
 
-def single_feature_model_performance():
-    #test each feature for the performance
-
-def show_mutual_information():
-
-
+def feature_one_by_one(df,features,test,params):
+    
+    feature_list = list(df[features].columns)
+    
+    df_temp = df[features]
+    y = df['y']
+    
+    feature_score = {}
+    
+    for feature in feature_list :
+        print("----------------------------------------------------------------------------------------------")
+        score = train_test_split_train(df_temp[[feature]],y,test[[feature]],
+                                           test['y'],params,[feature],50,False,0.5)
+         
+        feature_score[feature] = score
+        print("current feature  :", feature)
+        print("score :", score)
+        
+    return sorted(feature_score.items(), key=operator.itemgetter(1))
+        
+def add_swap_noise(cur_data, all_data, noise_level=0.07):
+    """
+    Add swap noise to current data
+    :param cur_data: Current batch of data
+    :param all_data: The whole data set
+    :param noise_level: percentage of columns being swapped
+    :return: data with swap noise added
+    """
+    batch_size = cur_data.shape[0]
+    num_samples = all_data.shape[0]
+    num_features = cur_data.shape[1]
+    #可能会导致同一个batch内部的互换,虽然概率应该很低
+    random_row = np.random.randint(0, num_samples, size=batch_size)
+    for i in range(batch_size):
+        random_swap = np.random.rand(num_features) < noise_level
+        cur_data[i, random_swap] = all_data[random_row[i], random_swap]
+    return cur_data

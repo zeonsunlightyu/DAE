@@ -1,14 +1,7 @@
 import numpy as np
 
 def add_swap_noise(cur_data, all_data, noise_level=0.15):
-    """
-    copy from randxie's blog
-    Add swap noise to current data
-    :param cur_data: Current batch of data
-    :param all_data: The whole data set
-    :param noise_level: percentage of columns being swapped
-    :return: data with swap noise added
-    """
+  
     batch_size = cur_data.shape[0]
     num_samples = all_data.shape[0]
     num_features = cur_data.shape[1]
@@ -30,8 +23,6 @@ def batch_generator(data, batch_size, shuffle=True):
             index_array = np.arange(n)
             if shuffle:
                 index_array = np.random.permutation(n)
-            #reset random seed
-            #np.random.seed(np.random.randint(1000000000))
             
         current_index = (batch_index * batch_size) % n
         if n >= current_index + batch_size:

@@ -1,5 +1,5 @@
 from Processer import *
-from config imprort *
+from config import *
 from dae_model import *
 from generator import *
 

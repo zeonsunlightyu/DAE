@@ -6,7 +6,7 @@ from keras import optimizers
 from keras import losses
 from generator import *
 
-class NN_model(Object):
+class NN_model:
     def __init__(self,X):
         self.noise_level = config.noise_level
         self.epoch = config.epoch

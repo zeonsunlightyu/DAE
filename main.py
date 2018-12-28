@@ -44,3 +44,4 @@ def load_data():
      df = load_data()
      nn = NN_model(df)
      nn.fit()
+main()

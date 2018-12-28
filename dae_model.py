@@ -17,7 +17,9 @@ class NN_model(Object):
         self.wdecay = config.wdecay
         self.X = X
         self.model = self.bulid_model()
-        self.data_generator = swap_noise_generator(data = self.X,batch_szie = )
+        self.data_generator = swap_noise_generator(data = self.X,
+                                                   batch_szie = self.batch_size,
+                                                   noise_level = self.noise_level)
         
     def build_model(self):
         

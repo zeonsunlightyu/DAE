@@ -39,9 +39,9 @@ def load_data():
     
     return df
 
- def main():
+def main():
      
-     df = load_data()
-     nn = NN_model(df)
-     nn.fit()
+    df = load_data()
+    nn = NN_model(df)
+    nn.fit()
 main()

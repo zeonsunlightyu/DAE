@@ -77,9 +77,3 @@ class Processer(object):
             if drop_origin:
                 df = df.drop([column], axis=1)
         return df
-    
-    def discrization(df,col_names,method_list):
-        
-        
-        
-        

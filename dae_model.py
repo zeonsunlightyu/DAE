@@ -42,11 +42,3 @@ class NN_model:
                   steps_per_epoch=np.ceil(self.X.shape[0] / self.batch_size),
                   epochs=self.epoch,
                   verbose=1)
-    
-    def fit(self):
-        self.model = self.build_model()
-        self.model.fit(x = self.X,
-                  y = self.X,
-                  batch_size = self.batch_size,
-                  epochs=self.epoch,
-                  verbose=1)

@@ -1,0 +1,14 @@
+[1;32m=== normalization: "RankGauss" ===[0m
+build histogram feature-wise
+[1;34mstring attribute "DATA.normalizationSets" not found in cfg[0m
+build trafo maps feature-wise (doGaussTrafo:1 rankUnique:0 doMinus1Plus1:0)
+[1;34mREAL attribute "DATA.normalizationRankRatioMax" not found in cfg[0m
+colTypes  nZero:0 nUnary:0 nBinary:196 nMore:25 maxRankRatio:0
+tVals.size():2 isBinary:1 targetMin:0 targetMax:1 targetSpreadInv:1
+apply trafo
+[1;34mint attribute "DATA.writeOutCSV" not found in cfg[0m
+[1;31m[train] [dense][0m [1;32mnData[0m|[1;31mnFeat[0m|nTarget|nnz|fillrate:[1;32m595212[0m|[1;31m221[0m|1|131541852|1 feat/sample: cnt0|min|max|mean|std:0|221|221|221|0
+[feat] cnt0|cnt1|min|max|[1;32mmean|std[0m:106673965|9987587|-2.16325|4.28419|[1;32m0.0759271|0.389925[0m
+[1;31m[test] [dense][0m [1;32mnData[0m|[1;31mnFeat[0m|nTarget|nnz|fillrate:[1;32m892816[0m|[1;31m221[0m|1|197312336|1 feat/sample: cnt0|min|max|mean|std:0|221|221|221|0
+[feat] cnt0|cnt1|min|max|[1;32mmean|std[0m:160009897|14982039|-2.16301|4.28419|[1;32m0.0759648|0.389932[0m
+normalization done in 2.309[s]

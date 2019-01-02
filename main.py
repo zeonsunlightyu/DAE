@@ -34,7 +34,6 @@ def load_data():
     transformer_one = [
     (drop_columns, dict(col_names=calc_list)),
     (drop_columns, dict(col_names=non_features_list)),
-    (dtype_transform, dict()),
     (onehot,dict(cat_features = cat_list,drop_origin=False)),
     (rank_guass,dict(col_names = no_calc_bin_list))
     ]

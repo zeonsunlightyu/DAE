@@ -32,3 +32,14 @@ def rank_guass_rm_dupliacted(x):
     efi_x -= efi_x.mean()
     value_dict = dict(zip(x_temp, efi_x))
     return pd.Series(x).map(value_dict)
+
+def rank_guass_v_one(df,col_name):
+    series = df[col_name].rank()
+    series = series.values
+    m = -0.9
+    M = 0.9
+    series = (series - series.min()) / (series.max() - series.min())
+    series = series * (M - m) + m
+    series = np.sqrt(2)*erfinv(series)
+    series = series - series.mean()    
+    return pd.Series(series)

@@ -1,3 +1,46 @@
+
+[1;34mint attribute "GLOBAL.disableHardwareCheck" not found in cfg[0m
+sizeof int|REAL|long:4|4|8 INT_MAX|LONG_MAX|REAL_MAX:2147483647|9223372036854775807|3.40282e+38
+numCPU(from /proc/cpuinfo):4
+[1;32momp_set_num_threads(8)[0m
+model name	: AMD FX(tm)-9590 Eight-Core Processor
+cpu MHz		: 1400.000
+MemTotal:       32901420 kB
+GPU 0: GeForce GTX 1080 Ti (UUID: GPU-de3ba246-07de-2516-14b1-df347a6a4098)
+nFolds:5
+
+Training environment: cross validation, nFolds:5
+[1;35m[TRAIN MODE][0m
+[1;34mstring attribute "DATA.genBlendData" not found in cfg[0m
+
+[1;32m=== get data bounds ===[0m
+file:../train.nocalc.sparse (0.178191 GB) ............................................................1.33[s] 133.978 MB/sec  target:min|max|mean:0|1|0.0364475 feat:min|max|mean:-1|104|2.09113 nData|maxIdx|nnz:595212|220|30355812 fillrate:0.231818
+[1;34mstring attribute "DATA.valid" not found in cfg[0m
+file:../test.nocalc.sparse (0.267295 GB) ..........................................................................................1.769[s] 151.099 MB/sec  target:min|max|mean:0|0|0 feat:min|max|mean:-1|104|1.98853 nData|maxIdx|nnz:892816|220|45533616 fillrate:0.231818
+
+[1;32m=== skip sparse columns ===[0m
+minOcc:5 countSets:train+valid+test maxIdxGlobal:220
+nFeatAll:221[1;32m nFeatMinOcc:221[0m (empty columns also skipped)
+trainNNZ0:30355812 (removed:0 -> 0%)
+validNNZ0:0 (removed:0 -> -nan%)
+testNNZ0:45533616 (removed:0 -> 0%)
+
+[1;32m=== read data ===[0m
+[allocate 0.249989 GB] file:../train.nocalc.sparse (0.178191 GB) ............................................................0.947[s] 188.164 MB/sec 
+[allocate 0.374983 GB] file:../test.nocalc.sparse (0.267295 GB) ..........................................................................................1.412[s] 189.302 MB/sec 
+
+[1;32m=== transform features to dense format (fill missing values with 0) ===[0m
+[1;31m[train][0m allocate 0.526167 GB  (595212 x 221 matrix) nnz:131541852
+[1;31m[test][0m allocate 0.789249 GB  (892816 x 221 matrix) nnz:197312336
+
+[1;32m=== data stats ===[0m
+[1;31m[train] [dense][0m [1;32mnData[0m|[1;31mnFeat[0m|nTarget|nnz|fillrate:[1;32m595212[0m|[1;31m221[0m|1|131541852|1 feat/sample: cnt0|min|max|mean|std:0|221|221|221|0
+[feat] cnt0|cnt1|min|max|[1;32mmean|std[0m:109697191|13090365|-1|104|[1;32m0.553258|4.84805[0m
+[target0] cnt>0:21694(3.64475%) min|max|mean|std:0|1|0.0364475|0.187401
+[1;31m[test] [dense][0m [1;32mnData[0m|[1;31mnFeat[0m|nTarget|nnz|fillrate:[1;32m892816[0m|[1;31m221[0m|1|197312336|1 feat/sample: cnt0|min|max|mean|std:0|221|221|221|0
+[feat] cnt0|cnt1|min|max|[1;32mmean|std[0m:164541272|19638081|-1|104|[1;32m0.553579|4.8517[0m
+[target0] cnt>0:0(0%) min|max|mean|std:0|0|0|0
+
 [1;32m=== normalization: "RankGauss" ===[0m
 build histogram feature-wise
 [1;34mstring attribute "DATA.normalizationSets" not found in cfg[0m
@@ -12,3 +55,24 @@ apply trafo
 [1;31m[test] [dense][0m [1;32mnData[0m|[1;31mnFeat[0m|nTarget|nnz|fillrate:[1;32m892816[0m|[1;31m221[0m|1|197312336|1 feat/sample: cnt0|min|max|mean|std:0|221|221|221|0
 [feat] cnt0|cnt1|min|max|[1;32mmean|std[0m:160009897|14982039|-2.16301|4.28419|[1;32m0.0759648|0.389932[0m
 normalization done in 2.309[s]
+Load nn.cfg.unsupervised.dae.cfg
+content:""
+DATA.unsupervisedPreprocessing:"DAE1000|NN.topology=1500r,1500r,1500r,l|NN.lRate=3e-3|NN.minibatchSize=128|NN.backend=GPU32|NN.lRateDecay=0.995|NN.inputSwapNoise=0.07|NN.inputCorrection=1"
+loadSuccess:0
+
+[1;32m=== unsupervised: DAE(autoencoder), nEpochs:1000 ===[0m
+[1;34mint attribute "DATA.unsupervisedPreprocessingSaveMemory" not found in cfg[0m
+dense train data: [allocate 1.31542 GB] for DAE
+valueAll stats: min|max|mean|std:-2.16325|4.28419|0.0624177|0.323073
+GPU Device 0: "GeForce GTX 1080 Ti" with compute capability 6.1
+GPU Max Clock rate:1683MHz
+Memory Clock rate:5505Mhz
+CUBLAS initalized successfully!
+dropoutInput:0 inputCorrection:1 minibatchSize:128 loglossUpdate:0 maeUpdate:0 inputSwapNoise:0.07 inputSwapNoiseStart:0 inputSwapNoiseStartDecay:0 sparseBLAS:0 backend:GPU32[1] layerDropout0 noPrint:0 saveMemDropout:1
+
+[1;32mNet topology 4 layers[0m
+L0: 221(in)-1500 'r'ReLU  lRate:0.003 lRateDecay:0.995 regL2:0 regL1:0 dropout:0  w:222x1500  out(x3):1501x128 (0.00210051 GB) init..(uni:1 sp:1)[min|max|mean|std:-0.0672672|0.0672671|-4.74564e-05|0.0388202]
+L1: 1500(in)-1500 'r'ReLU  lRate:0.003 lRateDecay:0.995 regL2:0 regL1:0 dropout:0  w:1501x1500  out(x3):1501x128 (0.00977451 GB) init..(uni:1 sp:1)[min|max|mean|std:-0.0258199|0.0258199|8.51905e-06|0.0148989]
+L2: 1500(in)-1500 'r'ReLU  lRate:0.003 lRateDecay:0.995 regL2:0 regL1:0 dropout:0  w:1501x1500  out(x3):1501x128 (0.00977451 GB) init..(uni:1 sp:1)[min|max|mean|std:-0.0258199|0.0258199|8.51905e-06|0.0148989]
+L3: 1500(in)-221 'l'linear  lRate:0.003 lRateDecay:0.995 regL2:0 regL1:0 dropout:0  w:1501x221  out(x3):222x128 (0.00144055 GB) init..(uni:1 sp:1)[min|max|mean|std:-0.0258199|0.0258198|-1.80977e-05|0.0149005]
+net: 221-1500r-1500r-1500r-221l

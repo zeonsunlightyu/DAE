@@ -50,18 +50,22 @@ def onehot(df,cat_features,drop_origin = True,threshold=0):
             print("Drop column : {0}".format(column))
             df = df.drop([column], axis=1)
     return df
+
+def rank_guass_v_one(df,col_name):
+       
+    series = df[col_name].rank()
+    series = series.values
+    M = series.max()
+    m = series.min() 
+    series = ((series-m)/ (M - m))*1.98 - 0.99
+    series = np.sqrt(2)*erfinv(series)
+    series = series - series.mean()    
+    return pd.Series(series)
     
 def rank_guass(df,col_names):
        
     for c in col_names:
-        series = df[c].rank()
-        M = series.max()
-        m = series.min() 
-        print(c, m, len(series), len(set(df[c].tolist())))
-        series = (series-m)/(M-m)
-        series = series - series.mean()
-        series = series.apply(erfinv) 
-        df[c] = series
+        df[c] = rank_guass_v_one(df,c)
             
     return df
 

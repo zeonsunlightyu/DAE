@@ -43,3 +43,15 @@ def rank_guass_v_one(df,col_name):
     series = np.sqrt(2)*erfinv(series)
     series = series - series.mean()    
     return pd.Series(series)
+
+def rank_gauss(df,col):
+    lim = 0.999
+    values = df[col]
+    values = rankdata(values,method='average').astype(np.float64)
+    values = minmax_scale(values, feature_range=(-lim, lim))
+    #values = values/len(df)
+    #values = values - values.mean()
+    #values = values*2
+    values = np.sqrt(2)*erfinv(values)
+    values = values - values.mean()
+    return values

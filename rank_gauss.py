@@ -8,6 +8,7 @@ from  scipy.special import erf
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import MinMaxScaler
+
 def drop_columns(df, col_names):
         
     print('Before drop columns {0}'.format(df.shape))
@@ -93,7 +94,8 @@ def build_rankgauss_trafo(df):
     hist = dict(df.value_counts())
     hist_sorted_list = sorted(hist.items(), key=lambda x: x[0])
     
-    for v,v_oc in hist.iteritems():
+    for v,v_oc in hist.items():
+    #for v,v_oc in hist.iteritems():
         N = N + v_oc
         
     for v,v_oc in hist_sorted_list:
@@ -111,7 +113,7 @@ def build_rankgauss_trafo(df):
         
     mean = mean/float(N)
     
-    for v,rank_v in trafo_map.iteritems():
+    for v,rank_v in trafo_map.items():
         trafo_map[v] = rank_v - mean
     
     return trafo_map
@@ -191,16 +193,15 @@ class Compose(object):
 
 def load_data():
     
-    df = pd.read_csv('test.csv')
-    #df_test = pd.read_csv('test.csv')
+    df_train = pd.read_csv('train.csv')
+    df_test = pd.read_csv('test.csv')
     
-    #df = pd.concat([df_train, df_test], axis=0)
+    df = pd.concat([df_train, df_test], axis=0)
     
     cat_list = []
     calc_list = []
-    bin_list = []
-    other_list = []
-    non_features_list = ['id']
+    rankgauss_list = []
+    non_features_list = ['id','target']
     
     for col in df.columns:
         if col in non_features_list:
@@ -208,32 +209,35 @@ def load_data():
         if re.search(r'calc', col):
             calc_list.append(col)
         else:
-            if re.search(r'bin',col):
-                bin_list.append(col)
             if re.search(r'cat$', col):
                 cat_list.append(col)
-            if not re.search(r'calc', col) and not re.search(r'bin',col) and not re.search(r'cat$', col):
-                other_list.append(col)
+
+    for col in df.columns:
+        if col in non_features_list or col in calc_list:
+            continue
+        if len(df[col].value_counts()) > 2 :
+            rankgauss_list.append(col)
 
     print("the cat list : {0}".format(cat_list))
     print("the calc list : {0}".format(calc_list))
-    print("the bin list : {0}".format(bin_list))
-    print("other list : {0}".format(other_list))
-    
-    rank_gauss_list =  other_list + cat_list
+    print("the rank_guass list : {0}".format(rankgauss_list))
     
     transformer = [
     (drop_columns, dict(col_names=calc_list)),
     (drop_columns, dict(col_names=non_features_list)),
-    (onehot,dict(cat_features = cat_list,drop_origin=False)),
-    (perform_rank_gauss,dict(col_names = rank_gauss_list))
+    (onehot,dict(cat_features = cat_list,drop_origin=False))
+    #(perform_rank_gauss,dict(col_names = rankgauss_list))
     ]
-    
+    """
+    rankgauss_map = build_rankgauss_trafo(df[col_name])
+    return apply_rankgauss_map(df[col_name],rankgauss_map)
+    """
     df = Compose(transformer)(df)
-    #for col in rank_gauss_list:
-        #print(col)
-        #rankgauss_map = build_rankgauss_trafo(df_train[col])
-        #df[col] = apply_rankgauss_map(df[col],rankgauss_map)
+    
+    for col in rankgauss_list:
+        print(col)
+        rankgauss_map = build_rankgauss_trafo(df_train[col])
+        df[col] = apply_rankgauss_map(df[col],rankgauss_map)
         
     print("the shape of dataframe : {0}".format(df.shape))
     

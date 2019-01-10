@@ -1,4 +1,59 @@
 import numpy as np
+import pandas as pd
+from scipy.special import erfinv
+from scipy.special import erfcinv
+import re
+from  scipy.special import erf
+%matplotlib inline
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import MinMaxScaler
+def drop_columns(df, col_names):
+        
+    print('Before drop columns {0}'.format(df.shape))
+    df = df.drop(col_names, axis = 1)
+    print('After drop columns {0}'.format(df.shape))
+    return df
+   
+def dtype_transform(df):
+        
+    for col in df.select_dtypes(include=['float64']).columns:
+        df[col] = df[col].astype(np.float32)
+    for col in df.select_dtypes(include=['int64']).columns:
+        df[col] = df[col].astype(np.float32)
+    return df
+
+def label_encode(df,col_names):
+       
+    df = preprocessing.LabelEncoder().fit(df[col_names]).transform(df[col_names])
+        
+    return df
+
+def fill_missing(df,col_names,fill_values):
+       
+    for i in range(len(col_names)):
+        print('filling {0}'.format(col_names[i]))
+        df[col_names[i]] = fill_values[i].fit(df[col_names[i]]).transform(df[col_names[i]])
+        
+    return df
+ 
+def onehot(df,cat_features,drop_origin = True,threshold=0):
+        
+    for column in cat_features:
+        print("the number of unique number(exclude threhold): {0}".format(len(df[column].unique())))
+        dummy_column = pd.get_dummies(pd.Series(df[column]), prefix=column)
+        abort_columns = []
+        for col in dummy_column:
+            if dummy_column[col].sum() < threshold:
+                print('column {0} unique value {1} less than threshold {2}'.format(col,dummy_column.sum(),threshold))
+                abort_columns.append(col)
+        print("Abort columns : {0}".format(abort_columns))
+        remain_cols = [c for c in dummy_column.columns if c not in abort_columns]
+        df = pd.concat([df,dummy_column[remain_cols]],axis=1)
+        if drop_origin:
+            print("Drop column : {0}".format(column))
+            df = df.drop([column], axis=1)
+    return df
 
 def rational_approximation(t):
     
@@ -61,6 +116,125 @@ def build_rankgauss_trafo(df):
     
     return trafo_map
 
-def apply_rank_trafo(df,trafo_map):
+def lower_bound(sequence, value, compare=cmp):
     
+    elements = len(sequence)
+    offset = 0
+    middle = 0
+    found = len(sequence)
+ 
+    while elements > 0:
+        middle = elements / 2
+        if compare(value, sequence[offset + middle]) > 0:
+            offset = offset + middle + 1
+            elements = elements - (middle + 1)
+        else:
+            found = offset + middle
+            elements = middle
+    return found
+
+def apply_rankgauss_map(df,trafo_map):
     
+    values = df.values
+    sorted_key_list = sorted(list(trafo_map.keys()))
+    rankgauss_values = []
+    
+    for index, value in enumerate(values):
+        
+        rankgauss_value = 0
+        if value in trafo_map:
+            rankgauss_value = trafo_map[value]       
+        else:
+            lb = lower_bound(sorted_key_list, value)
+            
+            #high clip
+            if lb > len(sorted_key_list)-1:
+                lb_value = sorted_key_list[len(sorted_key_list)-1]
+                rankgauss_value = trafo_map[lb_value]
+            else:
+                #low clip
+                lb_value = sorted_key_list[lb]
+                rankgauss_value = trafo_map[lb_value]
+      
+                if lb > 0:
+                    x0 = sorted_key_list[lb-1]
+                    y0 = trafo_map[x0]
+                    x1 = lb_value
+                    y1 = trafo_map[x1]
+                    rankgauss_value = y0 + (value - x0) * (y1 - y0) / (x1 - x0)
+                
+        rankgauss_values.append(rankgauss_value)
+        
+    return np.array(rankgauss_values)
+
+def rank_gauss(df,col_name):
+       
+    rankgauss_map = build_rankgauss_trafo(df[col_name])
+    return apply_rankgauss_map(df[col_name],rankgauss_map)
+
+def perform_rank_gauss(df,col_names):
+    df[col_names] = df[col_names].replace(-1,0)
+    for c in col_names:
+        print(c)
+        print(df[c].dtype)
+        df[c] = rank_gauss(df,c)      
+    return df
+
+class Compose(object):
+    def __init__(self, transforms_params):
+        self.transforms_params = transforms_params
+    def __call__(self, df):
+        for transform_param in self.transforms_params:
+            transform, param = transform_param[0], transform_param[1]
+            df = transform(df, **param)
+        return df
+
+def load_data():
+    
+    df = pd.read_csv('test.csv')
+    #df_test = pd.read_csv('test.csv')
+    
+    #df = pd.concat([df_train, df_test], axis=0)
+    
+    cat_list = []
+    calc_list = []
+    bin_list = []
+    other_list = []
+    non_features_list = ['id']
+    
+    for col in df.columns:
+        if col in non_features_list:
+            continue
+        if re.search(r'calc', col):
+            calc_list.append(col)
+        else:
+            if re.search(r'bin',col):
+                bin_list.append(col)
+            if re.search(r'cat$', col):
+                cat_list.append(col)
+            if not re.search(r'calc', col) and not re.search(r'bin',col) and not re.search(r'cat$', col):
+                other_list.append(col)
+
+    print("the cat list : {0}".format(cat_list))
+    print("the calc list : {0}".format(calc_list))
+    print("the bin list : {0}".format(bin_list))
+    print("other list : {0}".format(other_list))
+    
+    rank_gauss_list =  other_list + cat_list
+    
+    transformer = [
+    (drop_columns, dict(col_names=calc_list)),
+    (drop_columns, dict(col_names=non_features_list)),
+    (onehot,dict(cat_features = cat_list,drop_origin=False)),
+    (perform_rank_gauss,dict(col_names = rank_gauss_list))
+    ]
+    
+    df = Compose(transformer)(df)
+    #for col in rank_gauss_list:
+        #print(col)
+        #rankgauss_map = build_rankgauss_trafo(df_train[col])
+        #df[col] = apply_rankgauss_map(df[col],rankgauss_map)
+        
+    print("the shape of dataframe : {0}".format(df.shape))
+    
+    return df

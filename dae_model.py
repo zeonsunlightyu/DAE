@@ -25,10 +25,10 @@ class NN_model:
     def build_model(self):
         
         inputs = Input((self.X.shape[1],))
-        x = Dense(1500, activation='relu',kernel_initializer=self.init)(inputs)
-        x = Dense(1500, activation='relu',kernel_initializer=self.init)(x)
-        x = Dense(1500, activation='relu',kernel_initializer=self.init)(x)
-        outputs = Dense(self.X.shape[1],kernel_initializer=self.init)(x)
+        x = Dense(1500, activation='relu',kernel_initializer=self.kernel_initializer_0)(inputs)
+        x = Dense(1500, activation='relu',kernel_initializer=self.kernel_initializer_1)(x)
+        x = Dense(1500, activation='relu',kernel_initializer=self.kernel_initializer_2)(x)
+        outputs = Dense(self.X.shape[1],kernel_initializer=self.kernel_initializer_3)(x)
         model = Model(inputs=inputs, outputs=outputs)
         model.compile(optimizer=self.opt, loss=self.loss, metrics=[self.metric])
         print(model.get_weights())
